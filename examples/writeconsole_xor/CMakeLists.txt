@@ -1,0 +1,4 @@
+add_executable(writeconsole_xor main.cpp)
+target_compile_definitions(writeconsole_xor PRIVATE SCFW_ENABLE_XOR_STRING)
+target_link_libraries(writeconsole_xor PRIVATE scfw)
+scfw_extract_shellcode(writeconsole_xor)

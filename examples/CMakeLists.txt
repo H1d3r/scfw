@@ -1,0 +1,6 @@
+add_subdirectory(empty)
+add_subdirectory(kernel_query_user)
+add_subdirectory(messagebox)
+add_subdirectory(opengl_triangle)
+add_subdirectory(writeconsole_xor)
+add_subdirectory(writeconsole)

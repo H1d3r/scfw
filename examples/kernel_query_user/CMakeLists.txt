@@ -1,0 +1,3 @@
+add_executable(kernel_query_user main.cpp)
+target_link_libraries(kernel_query_user PRIVATE scfw)
+scfw_extract_shellcode(kernel_query_user)
