@@ -11,7 +11,11 @@ if(NOT CMAKE_CXX_COMPILER_TARGET)
     message(FATAL_ERROR "CMAKE_CXX_COMPILER_TARGET not set. Use a toolchain file.")
 endif()
 
-# Force .exe extension for Windows PE files when cross-compiling
+# Force .exe extension for Windows PE output.
+# Both forms are needed: the normal variable overrides the empty value set by
+# CMake's Generic platform module in the current scope, and the cache variable
+# ensures it applies in the consumer's scope when scfw is a subdirectory.
+set(CMAKE_EXECUTABLE_SUFFIX ".exe" CACHE STRING "" FORCE)
 set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 
 # Set default build type to Release if not specified

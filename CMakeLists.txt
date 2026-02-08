@@ -11,5 +11,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/scfw.cmake)
 add_subdirectory(lib)
-add_subdirectory(examples)
-add_subdirectory(tools)
+
+option(SCFW_BUILD_EXAMPLES "Build example shellcodes" ${PROJECT_IS_TOP_LEVEL})
+option(SCFW_BUILD_TOOLS "Build tools (scrun)" ${PROJECT_IS_TOP_LEVEL})
+
+if(SCFW_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if(SCFW_BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
