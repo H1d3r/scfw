@@ -5,6 +5,7 @@ set(SCFW_LLVM_SEARCH_PATHS
     /opt/homebrew/opt/llvm/bin
     /usr/local/opt/llvm/bin
     # Linux
+    /usr/lib/llvm-23/bin
     /usr/lib/llvm-22/bin
     /usr/lib/llvm-21/bin
     /usr/lib/llvm-20/bin

@@ -60,9 +60,10 @@ _scfw_ cross-compiles Windows shellcode from any host OS. You don't need a Windo
 
 - **CMake** 3.22+
 - **Ninja** build system
-- **clang** clang 19+
-  - _**Note:**_ On Windows, [clang 21+ currently experiences issues with `/FILEALIGN:1` during linking](https://github.com/llvm/llvm-project/issues/180406).
-    If you encounter linker errors, try to compile with `-DSCFW_FILE_ALIGNMENT=0` or switch to older clang version.
+- **clang** 19+, recommended 23+
+  - On Windows, [clang 21 and 22 experiences issues with `/FILEALIGN:1` during linking](https://github.com/llvm/llvm-project/issues/180406).
+    If you encounter linker errors, try to compile with `-DSCFW_FILE_ALIGNMENT=0`.
+  - The issue is [**fixed in clang 23.1.0**](https://github.com/llvm/llvm-project/pull/180411).
 - **LLVM tools**: `lld-link`, `llvm-objcopy`, `llvm-readobj`
 - **Windows SDK** headers and libraries (can be fetched automatically on any platform, see below)
 
