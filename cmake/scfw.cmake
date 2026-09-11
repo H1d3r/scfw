@@ -216,13 +216,28 @@ function(scfw_extract_shellcode target_name)
         set(_bin_file "$<TARGET_FILE_DIR:${target_name}>/${target_name}.bin")
 
         add_custom_command(TARGET ${target_name} POST_BUILD
+            # Reject anything that is not a self-contained single-section
+            # image (the shellcode only carries .text).
             COMMAND ${CMAKE_COMMAND}
                 -DLLVM_READOBJ=${LLVM_READOBJ}
                 -DPE_FILE=$<TARGET_FILE:${target_name}>
                 -P ${SCFW_CMAKE_DIR}/post-build/verify_pe.cmake
+
+            # Dump .text as a flat blob.
             COMMAND ${LLVM_OBJCOPY}
                 --dump-section=.text=${_bin_file}
                 $<TARGET_FILE:${target_name}>
+
+            # The dump stops at SizeOfRawData, so pad the blob up to
+            # VirtualSize, which includes the uninitialized data at the end.
+            COMMAND ${CMAKE_COMMAND}
+                -DLLVM_READOBJ=${LLVM_READOBJ}
+                -DLLVM_OBJCOPY=${LLVM_OBJCOPY}
+                -DPE_FILE=$<TARGET_FILE:${target_name}>
+                -DBIN_FILE=${_bin_file}
+                -P ${SCFW_CMAKE_DIR}/post-build/pad_bin.cmake
+
+            # Report the final size.
             COMMAND ${CMAKE_COMMAND}
                 -DBIN_FILE=${_bin_file}
                 -P ${SCFW_CMAKE_DIR}/post-build/print_size.cmake

@@ -136,8 +136,11 @@
 //   .text$20      _entry                    IMPORT_END() macro
 //   .text$aaa     framework code            runtime.h, crt0.h, etc.
 //   .text$yyy     user code                 after IMPORT_END()
+//   .data$00      __dispatch_table          IMPORT_END() macro
+//   .data$yyy     user data                 after IMPORT_END()
 //
 // _init must be first (it's the PE entry point). User code comes last.
+// /MERGE appends whole output sections, so .data$* lands after every .text$*.
 //
 //=============================================================================
 // MEMORY LAYOUT
@@ -251,13 +254,17 @@ extern "C" void __fastcall entry(void* argument1, void* argument2);
 // IMPORT_END() - seals the dispatch table and generates the _entry function.
 //
 // - Defines dispatch_table as the final dispatch_table_impl specialization.
-// - Instantiates `__dispatch_table` as a global (lands in `.data` -> merged to `.text`).
+// - Instantiates `__dispatch_table` in `.data$00` (merged into `.text`).
+//   The explicit section is needed. A zero-initialized global goes to `.bss`,
+//   which has no file bytes, so the table would sit past SizeOfRawData and be
+//   missing from the extracted `.bin`.
 // - Creates `_entry()` in `.text$20` which:
 //     - gets the PIC-adjusted address of `__dispatch_table`,
 //     - calls `dt->init()` to resolve all modules and symbols,
 //     - calls the user's `entry()` function,
 //     - calls `dt->destroy()` for cleanup (e.g., `FreeLibrary`).
-// - Switches to `.text$yyy` so all subsequent user code goes there.
+// - Switches to `.text$yyy` and `.data$yyy` so all subsequent user code and
+//   initialized user data go there.
 //
 
 #define IMPORT_END()                                                          \
@@ -265,6 +272,8 @@ extern "C" void __fastcall entry(void* argument1, void* argument2);
     namespace detail {                                                        \
     struct dispatch_table                                                     \
         : dispatch_table_impl<__COUNTER__, SCFW_MODE> {};                     \
+    __pragma(data_seg(".data$00"))                                            \
+    __declspec(allocate(".data$00"))                                          \
     extern "C" dispatch_table __dispatch_table{};                             \
                                                                               \
     __pragma(code_seg(".text$20"))                                            \
@@ -282,7 +291,8 @@ extern "C" void __fastcall entry(void* argument1, void* argument2);
     } /* namespace detail */                                                  \
     } /* namespace sc */                                                      \
                                                                               \
-    __pragma(code_seg(".text$yyy"))
+    __pragma(code_seg(".text$yyy"))                                           \
+    __pragma(data_seg(".data$yyy"))
 
 //
 // IMPORT_MODULE(name [, FLAGS(flags)]) - declare a DLL dependency.
